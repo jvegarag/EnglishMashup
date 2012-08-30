@@ -1,0 +1,11 @@
+Wordreference
+Api Key: 8d994
+
+Microsoft
+Key: LIil2zjCmMzBKegSoh+mx0hEyS9xwS4NHgGEco9OjE0=
+Clave de cuenta principal	e13ntliniOjPjd49ARsYqecoETVCyZ9EsQaAsZS0joU=
+Id. de cliente	61793d78-d949-4cc2-9a36-04a349c15ef3
+
+Google Speadsheet
+https://docs.google.com/spreadsheet/pub?key=0AplTiHy702EOdEV5aDRzYXZ3N2pfZlNxOTNEdDNfaHc&output=html
+https://spreadsheets.google.com/feeds/list/0AplTiHy702EOdEV5aDRzYXZ3N2pfZlNxOTNEdDNfaHc/od6/public/values?alt=json-in-script&callback=callback
