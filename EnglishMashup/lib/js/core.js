@@ -1,3 +1,28 @@
+var Core = {
+	
+	loadApplication : function() {
+		$('#loadingLayer').modal();
+	}
+	
+};
+
+
+var TaskAdmin = function() {
+	
+	var $loading = $('#taskContainer'),
+		taskClasses = [ 'progress-info', 'progress-danger', 'progress-warning', 'progress-success'],
+		activeTasks = 0;
+	
+	this.addTask = function(options) {
+		activeTasks++;
+		var taskClass = taskClasses[activeTasks % taskClasses.length];
+		
+		options.exec.apply(options, options.execArguments);
+	};
+	
+};
+
+
 var Utils = {
 	
 	speakableMarkup : function(text) {

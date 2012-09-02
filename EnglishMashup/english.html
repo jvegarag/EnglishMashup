@@ -3,11 +3,11 @@
   <head>
     <title>English Review</title>
     <!-- Bootstrap -->
-    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/css/bootstrap-combined.min.css" rel="stylesheet">
+    <link href="resources/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="resources/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" />
 <!-- 	<link href="http://twitter.github.com/bootstrap/assets/css/docs.css" rel="stylesheet"> -->
 	
 	<style type="text/css">
-		#main-container { margin: 10px;}
 		.speakable { border: 1px solid grey; padding-left: 20px; cursor:hand; cursor:pointer;border-color: gray; font-size: 12px;	}
 		.speakable:hover { 
 			color:red;
@@ -20,50 +20,80 @@
 		.bs-docs-example:hover::after {
 			content: 'Click to speak';			
 		}
-		
 		.speak {
 			padding-left: 30px !important;
 		}
+		
+		#header { background-color: #FBFCFB; }
 	</style>
 	
   </head>
   <body>
 	
 	<div id="main-container" class="container-fluid">
-		<div class="row">
-		  <div class="span3">
-			<ul class="nav nav-pills nav-stacked">
-			  <li class="active"><a href="#listVocabulary"><i class="icon-chevron-right"></i> List Vocabulary</a></li>
-			  <li class=""><a href="#gridSystem"><i class="icon-chevron-right"></i> Grid system</a></li>
-			  <li class=""><a href="#fluidGridSystem"><i class="icon-chevron-right"></i> Fluid grid system</a></li>
-			  <li class=""><a href="#layouts"><i class="icon-chevron-right"></i> Layouts</a></li>
-			  <li class=""><a href="#responsive"><i class="icon-chevron-right"></i> Responsive design</a></li>
-			</ul>
+	
+		<div class="row-fluid">
+		  <div id="header" class="span12">
+	  		
+	  		<h1>English Mashup</h1>
+					 		  
+			 <div class="row-fluid">
+				  <div class="span2">
+					<ul class="nav nav-pills nav-stacked">
+					  <li class="active"><a href="#listVocabulary"><i class="icon-chevron-right"></i> List Vocabulary</a></li>
+					  <li class=""><a href="#gridSystem"><i class="icon-chevron-right"></i> Grid system</a></li>
+					  <li class=""><a href="#fluidGridSystem"><i class="icon-chevron-right"></i> Fluid grid system</a></li>
+					  <li class=""><a href="#layouts"><i class="icon-chevron-right"></i> Layouts</a></li>
+					  <li class=""><a href="#responsive"><i class="icon-chevron-right"></i> Responsive design</a></li>
+					</ul>
+				  </div>
 			  
-		  </div>
+				  <div class="span8" style="background-color:green">
+					b
+				  </div>
+				  
+				  <div class="span2" style="background-color:green">
+				   c	
+				  </div>
+			  </div>
+		  </div> <!-- span12 -->
 		  
-		  <div id="content" class="span9">
-<!-- 		  	 <table  class="table table-bordered table-hover"> -->
-<!-- 		  	 	<thead> -->
-<!-- 		  	 		<tr> -->
-<!-- 		  	 			<th>English entry</th> -->
-<!-- 		  	 			<th>Spanish entry</th> -->
-<!-- 		  	 		</tr> -->
-<!-- 		  	 	</thead> -->
-<!-- 		  	 	<tbody> -->
-<!-- 		  	 		<th class="speak"><span>Hello</span>, <span>I</span>'m <span>massy</span></th> -->
-<!-- 		  	 		<th></th> -->
-<!-- 		  	 	</tbody> -->
-<!-- 		  	 	<tfoot> -->
-		  	 	
-<!-- 		  	 	</tfoot> -->
-<!-- 		  	 </table> -->
-
-		  </div>
-		</div>	
+		</div>	<!-- row fluid -->
 		
-		
-	<audio id="audioPlayer" controls="controls"></audio>
+	</div>
+	
+	
+ 	<a href="#myModal" class="btn">Launch demo modal</a> 
+ 	<div class="modal fade" id="loadingLayer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static"> 
+		<div class="modal-header"> 
+		  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button> 
+		  <h3>Setting up</h3> 
+		</div> 
+		<div class="modal-body" id="taskContainer"> 
+			<div class="row-fluid">
+				<div class="span4">Microsoft Translator</div>
+				<div class="span8">	<div class="progress progress-success progress-striped"> <div class="bar" style="width: 100%;"></div>	</div> </div>
+			</div>
+			
+			<div class="row-fluid">
+				<div class="span4">Google Translator</div>
+				<div class="span8">	<div class="progress progress-warning progress-striped active"> <div class="bar" style="width: 80%;"></div>	</div> </div>
+			</div>		
+			
+			<div class="row-fluid">
+				<div class="span4">Google spreadsheet</div>
+				<div class="span8">	<div class="progress progress-info progress-striped active"> <div class="bar" style="width: 60%;"></div>	</div> </div>
+			</div>
+			
+			<div class="row-fluid">
+				<div class="span4">Loading lesson</div>
+				<div class="span8">	<div class="progress progress-danger progress-striped active"> <div class="bar" style="width: 40%;"></div>	</div> </div>
+			</div>
+			
+		</div>
+ 	</div> 	
+	
+<!-- 	<audio id="audioPlayer" controls="controls"></audio> -->
 	
 <!-- 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script> -->
 <!--     <script src="resources/bootstrap/js/bootstrap.min.js"></script> -->
@@ -80,21 +110,19 @@
 				}
 			},
 			{
+				load: 'resources/bootstrap/js/bootstrap.min.js',
+				callback : function(url, result, key) {
+					console.log('Loaded ->', url, result, key);
+				}
+			},
+			{
 				load: 'lib/js/core.js',
 				callback : function(url, result, key) {
 					console.log('Loaded ->', url, result, key);
-					//init();
-					
-// 					yepnope({
-// 						load : 'units/listWords/script.js',
-// 						callback : function(url, result, key) {
-// 							console.log('Loaded ->', url, result, key);
-// 						}
-// 					});
+					Core.loadApplication();
 				}
 			}]);
 	</script>
-
 	
 	<script type="text/javascript">
 		var Loader = function(resources) {
