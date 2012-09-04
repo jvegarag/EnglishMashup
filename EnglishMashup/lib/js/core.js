@@ -1,23 +1,159 @@
 var Core = {
 	
+	tm : null,
+	
+	loadUnit : function(name) {
+		yepnope({ 
+			load : 'units/' + name + '/unit.js',
+			callback : function(url, result, key) {
+				
+			},
+			error : function() {
+				alert('Error loading unit ' + name);
+			}
+		});
+	},
+	
 	loadApplication : function() {
-		$('#loadingLayer').modal();
+		//Instantiates a task manager
+		var tm = Core.tm = new TaskManager();
+		
+		//Batch for loading all engines and data
+		var taskBatch = {
+			batchedTasks : [],
+			finishedTasks : [],
+			tasks : [
+				{
+					name : 'Google spreadsheet',
+					exec : function(){
+						var taskObject = this;
+						EnglishEngine.retrieveData(function(){
+							taskBatch.endTask(taskObject);
+						});
+					}
+				},
+				{
+					name : 'Microsoft Translator',
+					exec : function(){
+						var taskObject = this;
+						Engines['Microsoft'].init(function(){
+							taskBatch.endTask(taskObject);
+						});
+					}
+				}
+			],
+			startTask : function(taskObject) {
+				taskBatch.batchedTasks.push(taskObject.taskId);
+			},
+			endTask : function(taskObject) {
+				tm.pauseTask(taskObject.taskId);
+				taskBatch.finishedTasks.push(taskObject.taskId);
+				var index = taskBatch.batchedTasks.indexOf(taskObject.taskId);
+				taskBatch.batchedTasks.splice(index, 1);
+				(taskBatch.batchedTasks.length == 0) && taskBatch.endBatch();
+			},
+			endBatch : function() {
+				window.setTimeout(function(){
+					$.each(taskBatch.finishedTasks, function(){
+						tm.endTask(this);
+					});
+				}, 500);
+				
+				tm.startTask({
+					name : 'Unit 1',
+					exec : function(){
+						Core.loadUnit('vocabulary');
+						tm.endTask(this.taskId);
+					}
+				});
+			}
+		};
+		
+		tm.startBatch(taskBatch);
+		tm.showLoading();
 	}
 	
 };
 
 
-var TaskAdmin = function() {
+var TaskManager = function() {
 	
-	var $loading = $('#taskContainer'),
-		taskClasses = [ 'progress-info', 'progress-danger', 'progress-warning', 'progress-success'],
-		activeTasks = 0;
+	var $loadingLayer = $('#loadingLayer').modal('hide'),
+		$tasksContainer = $('#taskContainer'),
+		taskClasses = [ 'progress-info', 'progress-warning', 'progress-success', 'progress-danger' ],
+		activeTasks = [],
+		taskPrefix = 'task_',
+		instance = this;
 	
-	this.addTask = function(options) {
-		activeTasks++;
-		var taskClass = taskClasses[activeTasks % taskClasses.length];
-		
-		options.exec.apply(options, options.execArguments);
+	this.showLoading = function() {
+		$loadingLayer.modal('show');
+	};
+	
+	this.hideLoading = function() {
+		$loadingLayer.modal('hide');
+	};
+	
+	var getTaskId = function() {
+		return activeTasks.length;
+	};
+	
+	var findTaskIndex = function(taskId) {
+		var index = -1;
+		$.each(activeTasks, function(idx){
+			if (this.taskId == taskId) {
+				index = idx;
+				return false;
+			}
+		});
+		return index;
+	};
+	
+	var getTaskMarkup = function(taskId, taskName, progress) {
+		var taskClass = taskClasses[activeTasks.length % taskClasses.length];
+		return [
+	        '<div class="row-fluid" id="' + taskPrefix + taskId +'">',
+				'<div class="span4">' + taskName + '</div>',
+				'<div class="span8">',
+					'<div class="progress ' + taskClass + ' progress-striped active"> <div class="bar" style="width:' + progress + '%;"></div> </div>',
+				'</div>',
+			'</div>'
+		].join('');
+	};
+	
+	this.endTask = function(taskId) {
+		$tasksContainer.find('#' + taskPrefix + taskId).fadeOut(function(){
+			$(this).remove();
+			var index = findTaskIndex(taskId);
+			activeTasks.splice(index, 1);
+			if (activeTasks.length == 0) {
+				instance.hideLoading();
+			}
+		});
+	};
+	
+	this.pauseTask = function(taskId) {
+		$('#' + taskPrefix + taskId).find('div.progress').removeClass('progress-striped');
+	};
+	
+	this.activateTask = function(taskId) {
+		$('#' + taskPrefix + taskId).find('div.progress').addClass('progress-striped');
+	};
+	
+	this.startTask = function(options) {
+		var taskId = getTaskId();
+		options['taskId'] = taskId;
+		activeTasks.push(options);
+		var taskMarkup = getTaskMarkup(taskId, options.name, 100);
+		$(taskMarkup).appendTo($tasksContainer);
+		options.exec.apply(options, options.arguments);
+		return taskId;
+	};
+	
+	this.startBatch = function(options) {
+		$.each(options.tasks, function(idx){
+			instance.startTask(this);
+			options.startTask && options.startTask(this);
+		});
 	};
 	
 };
@@ -63,43 +199,75 @@ var Utils = {
 	}
 };
 
-/** Redirect proxy for JSONP calls **/			
-var proxyCallback = {				
-	callback : function() {
-		if (typeof this.redirect === 'function') {
-			this.redirect.apply(this.redirect, arguments);
-			this.redirect = null;
+/** Redirect proxy for JSONP calls **/
+var ProxyCallback = function() {	
+	var redirect =  null,
+		instance = this,
+		id = ProxyCallback.instances.length;
+	
+	ProxyCallback.instances[id] = instance;	
+	
+	this.callback = function() {
+		if (typeof instance.redirect === 'function') {
+			instance.redirect.apply(instance.redirect, arguments);
 		}
 		else {
 			alert('Redirect proxy not defined');
 		}
-	},
-	redirect :  null
-};
-
-var EnglishEngine = function(conf){
-			
-	this.translate = function(text, callback) {
-		conf.translate(text, callback);
 	};
 	
-	this.speak = function(text) {
-		conf.speak(text);
+	this.getId = function() {
+		return id;
 	};
+	
+	this.setRedirection = function(redirect) {
+		instance.redirect = redirect;
+	};
+};
 
-	conf.initEngine();
+ProxyCallback.instances = [];
+
+
+
+
+
+var EnglishEngine = function(conf){
+	
+	var instance = this;
+	
+	var addMethod = function(name, method) {
+		if (method) instance[name] = method; 
+	};
+	
+	addMethod('translate', function(text, callback) {
+		conf.translate(text, callback);
+	});
+	
+	addMethod('speakSentence', function(text, callback) {
+		conf.speak(text);
+	});
+	
+	addMethod('speakWord', function(text, callback) {
+		conf.speak(text);
+	});	
+	
+	this.init = function(callback) {
+		conf.init(callback);
+	};
 };
 
 /** Static functions **/
-EnglishEngine.retrieveData = function() {
-	var googleSpreadsheetKey = '0AplTiHy702EOdEV5aDRzYXZ3N2pfZlNxOTNEdDNfaHc';			
+EnglishEngine.retrieveData = function(success) {
+	var googleSpreadsheetKey = '0AplTiHy702EOdEV5aDRzYXZ3N2pfZlNxOTNEdDNfaHc';
+	var proxy = new ProxyCallback();
+	
 	var url = 'https://spreadsheets.google.com/feeds/list/' + 
 			  googleSpreadsheetKey + 
-			  '/od6/public/values?alt=json-in-script&callback=proxyCallback.callback';
+			  '/od6/public/values?alt=json-in-script&callback=ProxyCallback.instances[' + proxy.getId() + '].callback';
 	
 	
 	//Configure a redirect callback
-	proxyCallback.redirect = function(jsonSpreadsheet) {
+	proxy.setRedirection(function(jsonSpreadsheet) {
 		var entries = jsonSpreadsheet.feed || [];
 		console.log(entries);
 		EnglishEngine.datasources = {
@@ -121,14 +289,14 @@ EnglishEngine.retrieveData = function() {
 			EnglishEngine.datasources.length = idx+1;
 		});
 		console.log('Data retrieved');				
-	};
+	});
 	
 	console.log('Retrieving data from google spreadshets...');
-	$.getScript(url);
+	$.getScript(url, success);
 };
 
 EnglishEngine.speakWord = function(word) {
-	var howjsayUrl = 'http://howjsay.com/mp3/' + encodeURIComponent(word.toLowerCase()) + '.mp3?' + (new Date().getTime());
+	var howjsayUrl = 'http://howjsay.com/mp3/' + encodeURIComponent(word.toLowerCase()) + '.mp3';// + (new Date().getTime());
 	$('#audioPlayer')
 		.attr('src', howjsayUrl)[0].play();
 };
@@ -152,82 +320,102 @@ EnglishEngine.phonetic = function(text, callback) {
 };
 
 
-var init = function() {
-	
-	EnglishEngine.retrieveData();
-	
-	var msEngine = new EnglishEngine({
-		fromLang : 'en',
-		toLang : 'es',
-		initEngine : function() {
-			var that = this;
-			var	data = {
-				grant_type : 'client_credentials',
-				scope : 'http://api.microsofttranslator.com',
-				client_id : '61793d78-d949-4cc2-9a36-04a349c15ef3',
-				client_secret : '6JGrj+LMlU5ArRFAPrkSPyxp6IrbkBczZqtmOlEOQ2c='			
-			};
-			
-			$.ajax({
-				type: 'POST',
-				url: 'https://datamarket.accesscontrol.windows.net/v2/OAuth2-13',
-				data: data,
-				success: function(data) {
-					that.accessToken = data.access_token;
-				}
-			});
-		},
-		translate : function(text, callback) {
-			var url = "http://api.microsofttranslator.com/V2/Ajax.svc/Translate?" +
-				"appId=Bearer " + encodeURIComponent(this.accessToken) +
-				"&from=" + encodeURIComponent(this.fromLang) +
-				"&to=" + encodeURIComponent(this.toLang) +
-				"&text=" + encodeURIComponent(text) +
-				"&oncomplete=proxyCallback.callback";
-			//Configure a redirection proxy for the callback
-			var trans = '';
-			proxyCallback.redirect = function(translation) {
-				trans = translation;
-			};
-			$.getScript(url, function() { 
-				callback(trans);
-			});
-		},
-		
-		speak : function(text) {
-			var format = "audio/mp3";
-			var option = "MinSize";		
-			var url = "http://api.microsofttranslator.com/V2/Ajax.svc/Speak?" + 
-					"oncomplete=" + 'proxyCallback.callback' + 
-					"&appId=Bearer " + encodeURIComponent(this.accessToken) + 
-					"&text=" + encodeURIComponent(text) + 
-					"&language=" + encodeURIComponent(this.fromLang) + 
-					"&format=" + encodeURIComponent(format) + 
-					"&options=" + option;
-					
-			//Configure a redirection proxy for the callback
-			proxyCallback.redirect = function(audio) {
-				$('#audioPlayer')
-					.attr('src', audio)[0].play();
-			};
-			$.getScript(url);
-		},
-		
-		accessToken : null
-	});			
-	
-	$(document)
-		.on('click', '.speak > span', function(event){
-			var $this = $(this);						
-			EnglishEngine.speakWord($this.text());					
-			event.stopPropagation();
-		})
-//			.on('hover', 'span', function(event){
-//				console.log(this);
-//			})				
-		.on('click', '.speak', function(){
-			msEngine.speak($(this).text());
-		});
-
+var Engines = {
+	'Microsoft' : null,
+	'Wordreference' : null,
+	'Howjsay' : null,
+	'Google' : null
 };
+
+
+Engines['Microsoft'] = new EnglishEngine({
+	fromLang : 'en',
+	toLang : 'es',
+	init : function(successCallback) {
+		var that = this;
+		var	postData = {
+			grant_type : 'client_credentials',
+			scope : 'http://api.microsofttranslator.com',
+			client_id : '61793d78-d949-4cc2-9a36-04a349c15ef3',
+			client_secret : '6JGrj+LMlU5ArRFAPrkSPyxp6IrbkBczZqtmOlEOQ2c='			
+		};
+		
+		/*
+		 janky({url: "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13",
+	            data: postData,
+	            method: 'post',
+	            success: function(data) {
+	            	console.log(data);
+	            	that.accessToken = data.access_token;
+	            	alert(successCallback);
+	            	successCallback();
+	            },
+	            error: function() {
+	              console.log('there was an error');
+	            }
+	    });		*/
+		
+		$.ajax({
+			type: 'POST',
+			url: 'https://datamarket.accesscontrol.windows.net/v2/OAuth2-13',
+			data: postData,
+			success: function(data) {
+				that.accessToken = data.access_token;
+				successCallback();
+			}
+		});
+	},
+	
+	translate : function(text, callback) {
+		var url = "http://api.microsofttranslator.com/V2/Ajax.svc/Translate?" +
+			"appId=Bearer " + encodeURIComponent(this.accessToken) +
+			"&from=" + encodeURIComponent(this.fromLang) +
+			"&to=" + encodeURIComponent(this.toLang) +
+			"&text=" + encodeURIComponent(text) +
+			"&oncomplete=proxyCallback.callback";
+		//Configure a redirection proxy for the callback
+		var trans = '';
+		proxyCallback.redirect = function(translation) {
+			trans = translation;
+		};
+		$.getScript(url, function() { 
+			callback(trans);
+		});
+	},
+	
+	speak : function(text) {
+		var format = "audio/mp3";
+		var option = "MinSize";		
+		var url = "http://api.microsofttranslator.com/V2/Ajax.svc/Speak?" + 
+				"oncomplete=" + 'proxyCallback.callback' + 
+				"&appId=Bearer " + encodeURIComponent(this.accessToken) + 
+				"&text=" + encodeURIComponent(text) + 
+				"&language=" + encodeURIComponent(this.fromLang) + 
+				"&format=" + encodeURIComponent(format) + 
+				"&options=" + option;
+				
+		//Configure a redirection proxy for the callback
+		proxyCallback.redirect = function(audio) {
+			$('#audioPlayer')
+				.attr('src', audio)[0].play();
+		};
+		$.getScript(url);
+	},
+	
+	accessToken : null
+});
+
+
+$(document)
+	.on('click', '.speak > span', function(event){
+		var $this = $(this);						
+		EnglishEngine.speakWord($this.text());					
+		event.stopPropagation();
+	})
+	//	.on('hover', 'span', function(event){
+	//		console.log(this);
+	//	})				
+	.on('click', '.speak', function(){
+		msEngine.speak($(this).text());
+	});
 
