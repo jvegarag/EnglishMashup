@@ -1,30 +1,55 @@
 <!DOCTYPE html>
 <html>
   <head>
+  	<meta charset="utf-8">
     <title>English Mashup</title>
     <!-- Bootstrap -->
     <link href="resources/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link href="resources/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" />
 <!-- 	<link href="http://twitter.github.com/bootstrap/assets/css/docs.css" rel="stylesheet"> -->
+
+<link href='http://fonts.googleapis.com/css?family=Galindo' rel='stylesheet' type='text/css'>
 	
 	<style type="text/css">
-		.speakable { border: 1px solid grey; padding-left: 20px; cursor:hand; cursor:pointer;border-color: gray; font-size: 12px;	}
-		.speakable:hover { 
-			color:red;
+		
+		.speak > span:hover { 
+			color: red;
+        	text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #ff2d95, 0 0 30px #ff2d95, 0 0 40px #ff2d95, 0 0 50px #ff2d95, 0 0 75px #ff2d95;			
 			
+      		/*text-shadow: 0 0 10px #fff,
+                   0 0 20px #fff,
+                   0 0 30px #fff,
+                   0 0 40px #ff00de,
+                   0 0 70px #ff00de,
+                   0 0 80px #ff00de,
+                   0 0 100px #ff00de,
+                   0 0 150px #ff00de;	*/		 
 		}
-		.speak > span:hover { color:red; font-weight: bold; text-decoration: underline; }
 		.speak > span { cursor:hand; cursor:pointer; }
 		
 		.bs-docs-example::after { content: 'Speakable' }
 		.bs-docs-example:hover::after {
-			content: 'Click to speak';			
+			content: 'Click to speak';
 		}
 		.speak {
 			padding-left: 30px !important;
 		}
 		
 		#header { background-color: #FBFCFB; }
+		#audioBox { margin-left: 10px; }
+		#speakQuery { font-size: 12px; }
+		
+		h1 {
+			/**http://www.midwinter-dg.com/blog_demos/css-text-shadows/fonts/bazar-webfont.woff*/
+	    	color: #d7ceb2;
+        	text-shadow: 3px 3px 0px #2c2e38, 5px 5px 0px #5c5f72;
+        	font-size: 50px;
+        	font-family: 'Galindo', cursive;
+        	letter-spacing: 10px;
+        	background-color: #393d48;
+        	padding: 25px;
+		}
+		
 	</style>
 	
   </head>
@@ -36,20 +61,30 @@
 		  <div id="header" class="span12">
 	  		
 	  		<h1>English Mashup</h1>
-			<div style="float:right"> <audio id="audioPlayer" controls="controls"></audio> </div>
 			<div class="row-fluid">
 				  <div class="span2">
 					<ul class="nav nav-pills nav-stacked">
-					  <li class="active"><a href="#listVocabulary"><i class="icon-chevron-right"></i> List Vocabulary</a></li>
+					  <li class="active"><a href="#listVocabulary"><i class="icon-chevron-right"></i> Vocabulary</a></li>
 					  <li class=""><a href="#gridSystem"><i class="icon-chevron-right"></i> Grid system</a></li>
 					  <li class=""><a href="#fluidGridSystem"><i class="icon-chevron-right"></i> Fluid grid system</a></li>
 					  <li class=""><a href="#layouts"><i class="icon-chevron-right"></i> Layouts</a></li>
 					  <li class=""><a href="#responsive"><i class="icon-chevron-right"></i> Responsive design</a></li>
 					</ul>
+					
+				  	<div id="audioBox" class="row well">
+				  		<form class="form-search" onsubmit="return false;">
+						 	<div class="input-append span10">
+						    	<input id="speakQuery" type="text" class="span12 search-query" placeholder="Type a word to speak!" />
+						   	 	<button type="submit" class="btn" onclick="EnglishEngine.speakWord($('#speakQuery').val());"><i class="icon-search"></i></button>
+							</div>
+						</form>				  		
+				  		<audio id="audioPlayer"></audio> 
+				  	</div>
+				  	
 				  </div>
 			  
 				  <div class="span8" id="unitContainer">
-					b
+					
 				  </div>
 				  
 				  <div class="span2" id="configContainer">
@@ -61,9 +96,60 @@
 		</div>	<!-- row fluid -->
 		
 	</div>
+
+ 	
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+ 	<link type="text/css" href="http://www.codebasehero.com/files/music-player/plugin/css/style.css" rel="stylesheet" />
+ 	<script type="text/javascript" src="resources/music-player/jquery-jplayer/jquery.jplayer.js"></script>
+ 	<script type="text/javascript" src="resources/music-player/ttw-music-player.js"></script>
+ 	<script type="text/javascript" src="http://www.codebasehero.com/files/music-player/demo/js/myplaylist.js"></script>
+	
+	<div id="audio" class="ttw-music-player">
+		<div class="player jp-interface">
+	        <div class="player-controls">
+	            <div class="main">
+	                <div class="jp-current-time"></div>
+	                <div class="play jp-play"></div>
+	                <div class="pause jp-pause"></div>
+	                <span class="unused-controls">
+	                    <span class="jp-video-play"></span>
+	                    <span class="jp-stop"></span>
+	                    <span class="jp-mute"></span>
+	                    <span class="jp-unmute"></span>
+	                    <span class="jp-volume-bar"></span>
+	                    <span class="jp-volume-bar-value"></span>
+	                    <span class="jp-volume-max"></span>
+	                    <span class="jp-current-time"></span>
+	                    <span class="jp-duration"></span>
+	                    <span class="jp-full-screen"></span>
+	                    <span class="jp-restore-screen"></span>
+	                    <span class="jp-repeat"></span>
+	                    <span class="jp-repeat-off"></span>
+	                    <span class="jp-gui"></span>
+	                    <span class="jp-previous"></span>
+	                    <span class="jp-next"></span>
+	                </span>
+	            </div>
+	            <div class="progress-wrapper">
+	                <div class="progress jp-seek-bar">
+	                    <div class="elapsed jp-play-bar"></div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    <div class="jPlayer-container"></div>
+	</div>	
 	
 	
- 	<a href="#myModal" class="btn">Launch demo modal</a> 
+	
+	
+	<script>
+	 $(document).ready(function(){
+	    $('#audio').jPlayer();
+	});
+	</script>
+
+	<a href="#myModal" class="btn">Launch demo modal</a> 
  	<div class="modal fade" id="loadingLayer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static"> 
 		<div class="modal-header"> 
 		  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button> 
@@ -72,7 +158,6 @@
 		<div class="modal-body" id="taskContainer"></div>
  	</div> 	
 	
-<!-- 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script> -->
 <!--     <script src="resources/bootstrap/js/bootstrap.min.js"></script> -->
 <!-- 	<script src="http://twitter.github.com/bootstrap/assets/js/bootstrap-popover.js"></script> -->
 <script src="http://saunter.org/janky.post/scripts/json2.js"></script>
@@ -81,12 +166,13 @@
 		//Loading ....
 		yepnope([ { load : 'http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js' },
 				  { load: 'resources/bootstrap/js/bootstrap.min.js' },
-				  { load: 'lib/js/janky.post.min.js' },
+				  { load: 'resources/music-player/ttw-music-player-min.js' },				  
 				  { load: 'lib/js/core.js',
 					callback : function(url, result, key) {
 						Core.loadApplication();
 					}
 				  } ]);
+
 	</script>
 	
   </body>

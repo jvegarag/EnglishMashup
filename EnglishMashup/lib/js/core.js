@@ -3,8 +3,9 @@ var Core = {
 	tm : null,
 	
 	loadUnit : function(name) {
+		$('#unitContainer').html('');
 		yepnope({ 
-			load : 'units/' + name + '/unit.js',
+			load : 'units/' + name + '/unit.js?' + (new Date().getTime()),
 			callback : function(url, result, key) {
 				
 			},
@@ -40,6 +41,15 @@ var Core = {
 							taskBatch.endTask(taskObject);
 						});
 					}
+				},
+				{
+					name : 'Audio player',
+					exec : function(){
+						var taskObject = this;
+						Core.loadAudioPlayer(function(){
+							taskBatch.endTask(taskObject);
+						});
+					}
 				}
 			],
 			startTask : function(taskObject) {
@@ -71,6 +81,19 @@ var Core = {
 		
 		tm.startBatch(taskBatch);
 		tm.showLoading();
+	},
+	
+	loadAudioPlayer : function(callback) {
+		yepnope([
+		     { load : 'resources/music-player/jquery-jplayer/jquery.jplayer.js' },
+		     { load : 'resources/music-player/ttw-music-player-min.js' },
+		     { load : 'resources/music-player/css/style.css',
+		       callback : function(url, result, key) {
+		    	   console.log(url, result, key);
+		    	   callback();
+		       }
+		     }
+		]);
 	}
 	
 };
@@ -162,17 +185,21 @@ var TaskManager = function() {
 var Utils = {
 	
 	speakableMarkup : function(text) {
-		var tokens = text.split(' '), markup = [];
-		$.each(tokens, function(idx){
-			markup.push('<span>' + this + '</span>');
-		});
-		return markup.join('&nbsp;');
+		
+		return text.replace(/[^\W]+/mig, "<span>$&</span>");
+		
+//		var tokens = text.split(/[\W]/mig), markup = [];
+//		$.each(tokens, function(idx){
+//			markup.push('<span>' + this + '</span>');
+//		});
+//		return markup.join('&nbsp;');
 	},
 	
 	toSpeakableText : function(container, text) {
 		var speakableMarkup = this.speakableMarkup(text);
 		var $cont = $(container);				
 		$cont.append( speakableMarkup );
+		/*
 		$cont.find('span').each(function(){
 			var $this = $(this),
 				word = $this.text();
@@ -191,7 +218,7 @@ var Utils = {
 					$('.popover-title:first > i').html(transcription);
 				});
 			});
-		});
+		});*/
 	},
 	
 	addEntryToDS : function(datasource, key, entryObj) {
@@ -419,3 +446,11 @@ $(document)
 		msEngine.speak($(this).text());
 	});
 
+
+$('#audioPlayer')
+	.bind('ended', function() {
+		console.log('Finish');
+	})
+	.bind('error', function() {
+		console.log('Error!');
+	});
