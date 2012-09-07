@@ -81,6 +81,13 @@ var Core = {
 		
 		tm.startBatch(taskBatch);
 		tm.showLoading();
+		
+		$('#audioBox').affix({
+		      offset: {
+		        top: 210, bottom: 270
+		      }
+		});		
+		
 	},
 	
 	loadAudioPlayer : function(callback) {
