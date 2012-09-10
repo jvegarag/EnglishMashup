@@ -8,24 +8,17 @@
     <link href="resources/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" />
 <!-- 	<link href="http://twitter.github.com/bootstrap/assets/css/docs.css" rel="stylesheet"> -->
 
-<link href='http://fonts.googleapis.com/css?family=Galindo' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Galindo' rel='stylesheet' type='text/css'>
+	
+	<link href='lib/js/engines/wordreference.css' rel='stylesheet' type='text/css'>
 	
 	<style type="text/css">
 		
-		.speak > span:hover { 
-			color: red;
-        	text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #ff2d95, 0 0 30px #ff2d95, 0 0 40px #ff2d95, 0 0 50px #ff2d95, 0 0 75px #ff2d95;			
-			
-      		/*text-shadow: 0 0 10px #fff,
-                   0 0 20px #fff,
-                   0 0 30px #fff,
-                   0 0 40px #ff00de,
-                   0 0 70px #ff00de,
-                   0 0 80px #ff00de,
-                   0 0 100px #ff00de,
-                   0 0 150px #ff00de;	*/		 
+		span.sp:hover { 
+			color: #002FFF;
+        	text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 10px #002FFF, 0 0 30px #002FFF, 0 0 40px #002FFF, 0 0 50px #002FFF, 0 0 75px #002FFF;			
 		}
-		.speak > span { cursor:hand; cursor:pointer; }
+		span.sp { cursor:hand; cursor:pointer; }
 		
 		.bs-docs-example::after { content: 'Speakable' }
 		.bs-docs-example:hover::after {
@@ -50,12 +43,23 @@
         	padding: 25px;
 		}
 		
-	.affix {
-	    position: fixed; 
-	    top: 20px; 
-	    left: 30px;
-	}		
+		.affix {
+		    position: fixed; 
+		    top: 20px; 
+		    left: 30px;
+		    width: 250px;
+		}		
+			
+		#searchResults { margin-top: 50px; }
+		#searchResults > .nav-tabs > li > a {
+			padding-top: 4px;
+			padding-bottom: 4px;
+		}
+		#audioBox { padding: 15px; }
 		
+		#pin { float:right; position:relative; top: -14px; right: -14px; }
+		#pin:hover { opacity: 0.8; cursor: pointer; }
+			
 	</style>
 	
   </head>
@@ -78,13 +82,26 @@
 					</ul>
 					
 				  	<div id="audioBox" class="row well" data-spy="affix">
+				  		<i id="pin" class="icon-share"></i>
 				  		<form class="form-search" onsubmit="return false;">
 						 	<div class="input-append span10">
-						    	<input id="speakQuery" type="text" class="span12 search-query" placeholder="Type a word to speak!" />
-						   	 	<button type="submit" class="btn" onclick="EnglishEngine.speakWord($('#speakQuery').val());"><i class="icon-search"></i></button>
+						    	<input id="searchField" type="text" class="span11 search-query" placeholder="Look for something" />
+						   	 	<button id="searchButton" type="submit" class="btn"><i class="icon-search"></i></button>
 							</div>
 						</form>				  		
-				  		<audio id="audioPlayer"></audio> 
+				  		<audio id="audioPlayer"></audio>
+				  		
+				  		<div id="searchResults">
+							<ul class="nav nav-tabs">
+							  <li class="active"><a href="#wr-search" data-toggle="tab">WR</a></li>
+							  <li><a href="#profile" data-toggle="tab">Other</a></li>
+							</ul>
+							
+							<div class="tab-content">
+								 <div class="tab-pane active" id="wr-search"> Wordreference Search </div>
+								 <div class="tab-pane" id="profile"> Other searches </div>
+							</div>							
+						</div>	
 				  	</div>
 				  	
 				  </div>
@@ -172,12 +189,21 @@
 		//Loading ....
 		yepnope([ { load : 'http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js' },
 				  { load: 'resources/bootstrap/js/bootstrap.min.js' },
-				  { load: 'resources/music-player/ttw-music-player-min.js' },				  
+				  { load: 'resources/music-player/ttw-music-player-min.js' },
+				  { load: 'lib/js/engines/wordreference.js' },
 				  { load: 'lib/js/core.js',
 					callback : function(url, result, key) {
-						Core.loadApplication();
+						//Core.loadApplication();
+						
+						$('#audioBox').affix({
+						      offset: {
+						        top: 260, bottom: 270
+						      }
+						});								
 					}
-				  } ]);
+				  }
+				  
+				  ]);
 
 	</script>
 	

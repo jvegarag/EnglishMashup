@@ -82,11 +82,7 @@ var Core = {
 		tm.startBatch(taskBatch);
 		tm.showLoading();
 		
-		$('#audioBox').affix({
-		      offset: {
-		        top: 210, bottom: 270
-		      }
-		});		
+	
 		
 	},
 	
@@ -193,7 +189,7 @@ var Utils = {
 	
 	speakableMarkup : function(text) {
 		
-		return text.replace(/[^\W]+/mig, "<span>$&</span>");
+		return text.replace(/[^\W]+/mig, '<span class="sp">$&</span>');
 		
 //		var tokens = text.split(/[\W]/mig), markup = [];
 //		$.each(tokens, function(idx){
@@ -264,7 +260,7 @@ ProxyCallback.instances = [];
 
 
 
-
+/*
 var EnglishEngine = function(conf){
 	
 	var instance = this;
@@ -288,6 +284,35 @@ var EnglishEngine = function(conf){
 	this.init = function(callback) {
 		conf.init(callback);
 	};
+};
+*/
+
+
+var EnglishEngine = function() {
+	
+	this.sourceDic = 'en';
+	this.targetDic = 'es';
+	
+	var notImplemented = function() {
+		alert('Not implementend');
+	};
+		
+	this.translateWord = function(word, callback) {
+		notImplemented();
+	};
+	
+	this.translateSentence = function(text, callback) {
+		notImplemented();
+	};
+	
+	this.speakSentence = function(text, callback) {
+		notImplemented();
+	};
+	
+	this.speakWord = function(word, callback) {
+		notImplemented();
+	};
+	
 };
 
 /** Static functions **/
@@ -441,7 +466,7 @@ Engines['Microsoft'] = new EnglishEngine({
 
 
 $(document)
-	.on('click', '.speak > span', function(event){
+	.on('click', 'span.sp', function(event){
 		var $this = $(this);						
 		EnglishEngine.speakWord($this.text());					
 		event.stopPropagation();
@@ -453,11 +478,27 @@ $(document)
 		msEngine.speak($(this).text());
 	});
 
+var englishEngine = new EnglishEngine();
+var wr = new WordReference(englishEngine);
 
-$('#audioPlayer')
+$(document).ready(function(){
+	
+	$('#searchButton').click(function(){
+		var word = $('#searchField').val();
+		EnglishEngine.speakWord(word);
+		wr.translateWord(word, function(result){
+			$('#wr-search').html( result );
+		});
+	});
+	
+	$('#audioPlayer')
 	.bind('ended', function() {
 		console.log('Finish');
 	})
 	.bind('error', function() {
 		console.log('Error!');
 	});
+	
+});
+
+
