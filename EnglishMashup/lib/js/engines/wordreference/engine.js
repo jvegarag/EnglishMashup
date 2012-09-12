@@ -27,18 +27,18 @@ var WordReference = function(baseEngine) {
 	var getTermMarkup = function(term, language) {
 		if (language == 'en') {
 			return [
-			        '<p class="term">', Utils.speakableMarkup( term['term'] ), '</p>',
-			        '<p class="pos">', term['POS'], '</p>',
-			        '<p class="sense">', term['sense']?'('+ Utils.speakableMarkup(term['sense'])+')':'', '</p>',
-			        '<p class="usage">',  term['usage'], '</p>'
+			        '<i class="term">', Utils.speakableMarkup( term['term'] ), '</i>&nbsp;',
+			        '<i class="pos">', term['POS'], '</i>&nbsp;',
+			        '<i class="sense">', term['sense']?'('+ Utils.speakableMarkup( term['sense'] )+')':'', '</i>&nbsp;',
+			        '<i class="usage">',  term['usage'], '</i>'
 			].join('');
 		}
-		else {
+		else {	
 			return [
-			        '<p class="term">', term['term'], '</p>',
-			        '<p class="pos">', term['POS'], '</p>',
-			        '<p class="sense">', term['sense']?'('+term['sense']+')':'', '</p>',
-			        '<p class="usage">',  term['usage'], '</p>'
+			        '<i class="term">', term['term'], '</i>&nbsp;',
+			        '<i class="pos">', term['POS'], '</i>&nbsp;',
+			        '<i class="sense">', term['sense']?'('+term['sense']+')':'', '</i>&nbsp;',
+			        '<i class="usage">',  term['usage'], '</i>'
 			].join('');
 		}
 	};

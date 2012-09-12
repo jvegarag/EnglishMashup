@@ -13,4 +13,6 @@ https://spreadsheets.google.com/feeds/list/0AplTiHy702EOdEV5aDRzYXZ3N2pfZlNxOTNE
 Cambridge Dictionaries 
 Account Details for Tano at Online API Developer Hub
 Username: tano63
-Password: 4846r2p2	
+Password: (ladesiempre)
+
+Api key: gGRmbTlFxdWk7H6oDxy8byQzJDYhhIyvNhTXHsFou2R8Y9WaL9kBH0UXtoULr1VV 

@@ -1,8 +1,0 @@
-table.wr.result { border: 1px solud gray; max-width:100%; background-color: white; font-size: 95%; }
-table.wr.result th { text-align: center; }
-table.wr.result td { vertical-align: top; padding:1px; white-space:pre-wrap; width:50%; }
-table.wr.result p { margin-left: 2px; margin-right:2px; display:inline; line-height: 15px; margin: 1px 2px 2px 1px; }
-table.wr.result p.term { font-weight: bold; }
-table.wr.result p.pos { color:blue; font-style: italic; }
-table.wr.result p.sense { font-style: italic; font-size:85%; }
-

@@ -10,7 +10,7 @@
 
 	<link href='http://fonts.googleapis.com/css?family=Galindo' rel='stylesheet' type='text/css'>
 	
-	<link href='lib/js/engines/wordreference.css' rel='stylesheet' type='text/css'>
+	<link href='lib/js/engines/wordreference/engine.css' rel='stylesheet' type='text/css'>
 	
 	<style type="text/css">
 		
@@ -190,7 +190,8 @@
 		yepnope([ { load : 'http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js' },
 				  { load: 'resources/bootstrap/js/bootstrap.min.js' },
 				  { load: 'resources/music-player/ttw-music-player-min.js' },
-				  { load: 'lib/js/engines/wordreference.js' },
+				  { load: 'lib/js/engines/wordreference/engine.js' },
+				  { load: 'lib/js/engines/cambridge/engine.js' },
 				  { load: 'lib/js/core.js',
 					callback : function(url, result, key) {
 						//Core.loadApplication();
