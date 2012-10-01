@@ -14,7 +14,6 @@ var unit = new function() {
 	
 	this.start = function() {
 		$wordsContainer = $('#wordsContainer');
-		
 		var enDS = EnglishEngine.datasources.english;
 		$.each(enDS, function(key, value){
 			addEntry(key, value['spanishentry']);
@@ -23,10 +22,8 @@ var unit = new function() {
 	};
 };
 		
-
 (function(){
-		
-	$.get('units/vocabulary/markup.html?' + (new Date()).getTime(), function(data){
+	$.get('units/vocabulary/markup.html', function(data){
 		$('#unitContainer').html(data);
 		unit.start();
 	});

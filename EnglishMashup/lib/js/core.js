@@ -1,18 +1,44 @@
+var undef = function(message) { alert(message); };
+
 var Core = {
 	
 	tm : null,
 	
-	loadUnit : function(name) {
-		$('#unitContainer').html('');
+	loadEngine : function(name, callback) {
+		var baseUrl = 'lib/js/engines/' + name + '/';
 		yepnope({ 
-			load : 'units/' + name + '/unit.js?' + (new Date().getTime()),
-			callback : function(url, result, key) {
-				
+			load : [baseUrl + 'engine.js', baseUrl + 'engine.css'],
+			callback : function(url, result, key) {},
+			complete : function() {
+				callback && callback();
 			},
 			error : function() {
-				alert('Error loading unit ' + name);
+				alert('Error loading engine ' + name);
 			}
 		});
+	},
+	
+	loadUnit : function(name, displayName) {
+		$('#unitContainer').html('');
+		
+		Core.tm.startTask({
+			name : displayName,
+			exec : function(){
+				var that = this;
+				yepnope({ 
+					load : 'units/' + name + '/unit.js?' + (new Date().getTime()),
+					callback : function(url, result, key) {},
+					complete: function() {
+						Core.tm.endTask(that.taskId);
+					},
+					error : function() {
+						alert('Error loading unit ' + name);
+					}
+				});
+			}
+		});		
+		
+
 	},
 	
 	loadApplication : function() {
@@ -34,11 +60,25 @@ var Core = {
 					}
 				},
 				{
+					name : 'Wordreference',
+					exec : function(){
+						var taskObject = this;
+						Core.loadEngine('wordreference', function(){
+							Engines['Wordreference'] = new WordReference(englishEngine);
+							Engines['Wordreference'].init();
+							taskBatch.endTask(taskObject);
+						});
+					}
+				},
+				{
 					name : 'Microsoft Translator',
 					exec : function(){
 						var taskObject = this;
-						Engines['Microsoft'].init(function(){
-							taskBatch.endTask(taskObject);
+						Core.loadEngine('microsoft', function(){
+							Engines['Microsoft'] = new Microsoft(englishEngine);
+							Engines['Microsoft'].init(function(){
+								taskBatch.endTask(taskObject);
+							});
 						});
 					}
 				},
@@ -69,21 +109,12 @@ var Core = {
 					});
 				}, 500);
 				
-				tm.startTask({
-					name : 'Unit 1',
-					exec : function(){
-						Core.loadUnit('vocabulary');
-						tm.endTask(this.taskId);
-					}
-				});
+				Core.loadUnit('vocabulary', 'Vocabulary List');
 			}
 		};
 		
 		tm.startBatch(taskBatch);
 		tm.showLoading();
-		
-	
-		
 	},
 	
 	loadAudioPlayer : function(callback) {
@@ -97,6 +128,77 @@ var Core = {
 		       }
 		     }
 		]);
+	},
+	
+	sBox : new function() {
+		
+		var currentPos = -1,
+			historical = [],
+			that = this;
+		
+		var addSearch = function(word) {
+			historical.push(word);
+			currentPos++;
+		};
+		
+		this.log = function() {
+			console.log( historical, currentPos);
+		};
+		
+		this.prev = function() {
+			if (currentPos-1 >= 0) {
+				that.searchWord(historical[--currentPos], true);
+			}
+		};
+		
+		this.next = function() {
+			if (currentPos+1 < historical.length) {
+				that.searchWord(historical[++currentPos], true);
+			}
+		};
+		
+		//TODO sacar esto de aqui
+		this.searchWord = function(word, historical) {
+			$('#searchField').val(word);
+			Engines['Wordreference'].translateWord(word, function(result){
+				$('#wr-search').html( result );
+			});
+			
+			!historical && addSearch(word);
+		};
+		
+		this.speakWord = function(word) {
+			Core.wordSpeakingEngine(word);
+		};
+		
+		this.speakSentence = function(text) {
+			Core.sentenceSpeakingEngine(text);
+		};
+	},
+	
+	/** Sentence Speaking Engine **/
+	sentenceSpeakingEngine : undef,
+	
+	/** Word Speaking Engine **/
+	wordSpeakingEngine : undef,
+	
+	setEngine : function(engine, selectedEngine) {
+		Core[engine] = selectedEngine;
+	},
+	
+	addConfigOption : function(engine, name, callback) {
+		var item = 
+			[ '<li class="option">',
+		  		'<a href="javascript:void(0)">', name ,'</a>',
+		  	  '</li>'
+		  	].join('');
+		
+		$(item)
+			.appendTo('#' + engine)
+			.find('a')
+			.click(function(){
+				Core.setEngine(engine, callback);
+			});
 	}
 	
 };
@@ -258,36 +360,6 @@ var ProxyCallback = function() {
 ProxyCallback.instances = [];
 
 
-
-
-/*
-var EnglishEngine = function(conf){
-	
-	var instance = this;
-	
-	var addMethod = function(name, method) {
-		if (method) instance[name] = method; 
-	};
-	
-	addMethod('translate', function(text, callback) {
-		conf.translate(text, callback);
-	});
-	
-	addMethod('speakSentence', function(text, callback) {
-		conf.speak(text);
-	});
-	
-	addMethod('speakWord', function(text, callback) {
-		conf.speak(text);
-	});	
-	
-	this.init = function(callback) {
-		conf.init(callback);
-	};
-};
-*/
-
-
 var EnglishEngine = function() {
 	
 	this.sourceDic = 'en';
@@ -378,6 +450,8 @@ EnglishEngine.phonetic = function(text, callback) {
 	});
 };
 
+//TODO New engine Howjsay
+Core.addConfigOption('wordSpeakingEngine', 'Howjsay', EnglishEngine.speakWord);
 
 var Engines = {
 	'Microsoft' : null,
@@ -387,108 +461,41 @@ var Engines = {
 };
 
 
-Engines['Microsoft'] = new EnglishEngine({
-	fromLang : 'en',
-	toLang : 'es',
-	init : function(successCallback) {
-		var that = this;
-		var	postData = {
-			grant_type : 'client_credentials',
-			scope : 'http://api.microsofttranslator.com',
-			client_id : '61793d78-d949-4cc2-9a36-04a349c15ef3',
-			client_secret : '6JGrj+LMlU5ArRFAPrkSPyxp6IrbkBczZqtmOlEOQ2c='			
-		};
-		
-		/*
-		 janky({url: "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13",
-	            data: postData,
-	            method: 'post',
-	            success: function(data) {
-	            	console.log(data);
-	            	that.accessToken = data.access_token;
-	            	alert(successCallback);
-	            	successCallback();
-	            },
-	            error: function() {
-	              console.log('there was an error');
-	            }
-	    });		*/
-		
-		$.ajax({
-			type: 'POST',
-			url: 'https://datamarket.accesscontrol.windows.net/v2/OAuth2-13',
-			data: postData,
-			success: function(data) {
-				that.accessToken = data.access_token;
-				successCallback();
-			}
-		});
-	},
-	
-	translate : function(text, callback) {
-		var url = "http://api.microsofttranslator.com/V2/Ajax.svc/Translate?" +
-			"appId=Bearer " + encodeURIComponent(this.accessToken) +
-			"&from=" + encodeURIComponent(this.fromLang) +
-			"&to=" + encodeURIComponent(this.toLang) +
-			"&text=" + encodeURIComponent(text) +
-			"&oncomplete=proxyCallback.callback";
-		//Configure a redirection proxy for the callback
-		var trans = '';
-		proxyCallback.redirect = function(translation) {
-			trans = translation;
-		};
-		$.getScript(url, function() { 
-			callback(trans);
-		});
-	},
-	
-	speak : function(text) {
-		var format = "audio/mp3";
-		var option = "MinSize";		
-		var url = "http://api.microsofttranslator.com/V2/Ajax.svc/Speak?" + 
-				"oncomplete=" + 'proxyCallback.callback' + 
-				"&appId=Bearer " + encodeURIComponent(this.accessToken) + 
-				"&text=" + encodeURIComponent(text) + 
-				"&language=" + encodeURIComponent(this.fromLang) + 
-				"&format=" + encodeURIComponent(format) + 
-				"&options=" + option;
-				
-		//Configure a redirection proxy for the callback
-		proxyCallback.redirect = function(audio) {
-			$('#audioPlayer')
-				.attr('src', audio)[0].play();
-		};
-		$.getScript(url);
-	},
-	
-	accessToken : null
-});
-
+var englishEngine = new EnglishEngine();
+//var wr = new WordReference(englishEngine);
 
 $(document)
 	.on('click', 'span.sp', function(event){
-		var $this = $(this);						
-		EnglishEngine.speakWord($this.text());					
+		var word = $(this).text();
+		Core.sBox.searchWord(word);
+		Core.sBox.speakWord(word);
 		event.stopPropagation();
 	})
-	//	.on('hover', 'span', function(event){
-	//		console.log(this);
-	//	})				
 	.on('click', '.speak', function(){
-		msEngine.speak($(this).text());
+		var sentence = $(this).text();
+		Core.sBox.speakSentence(sentence);
+		event.stopPropagation();
+	})
+	.on('click', '#config li.option', function(){
+		var $this = $(this);
+		$this.siblings().removeClass('active');
+		$this.addClass('active');
+	})
+	.on('click', '#main-menu li', function(){
+		var $this = $(this);
+		$this.siblings().removeClass('active');
+		$this.addClass('active');
+		
+		var $link = $this.find('a'); 
+		Core.loadUnit($link.attr('data-unit'), $link.attr('data-name'));
 	});
-
-var englishEngine = new EnglishEngine();
-var wr = new WordReference(englishEngine);
 
 $(document).ready(function(){
 	
 	$('#searchButton').click(function(){
 		var word = $('#searchField').val();
-		EnglishEngine.speakWord(word);
-		wr.translateWord(word, function(result){
-			$('#wr-search').html( result );
-		});
+		Core.sBox.searchWord(word);
+		Core.sBox.speakWord(word);
 	});
 	
 	$('#audioPlayer')

@@ -6,13 +6,11 @@
     <!-- Bootstrap -->
     <link href="resources/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link href="resources/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" />
-<!-- 	<link href="http://twitter.github.com/bootstrap/assets/css/docs.css" rel="stylesheet"> -->
-
 	<link href='http://fonts.googleapis.com/css?family=Galindo' rel='stylesheet' type='text/css'>
 	
-	<link href='lib/js/engines/wordreference/engine.css' rel='stylesheet' type='text/css'>
-	
 	<style type="text/css">
+		#header > h1 { margin-top: 0;}
+		#main-header { padding-left: 0; padding-right: 0;}
 		
 		span.sp:hover { 
 			color: #002FFF;
@@ -25,11 +23,16 @@
 			content: 'Click to speak';
 		}
 		.speak {
-			padding-left: 30px !important;
+			padding-left: 20px !important;
+			cursor: hand; cursor: pointer;
 		}
 		
-		#header { background-color: #FBFCFB; }
-		#audioBox { margin-left: 10px; }
+		.speak:hover {
+			color: blue;
+			background: transparent url('resources/img/headphones.png') no-repeat 2px center;  
+		}
+		
+		#header { background-color: #FBFCFB; margin:0; }
 		#speakQuery { font-size: 12px; }
 		
 		h1 {
@@ -43,84 +46,107 @@
         	padding: 25px;
 		}
 		
-		.affix {
+		#audioBox.affix {
 		    position: fixed; 
 		    top: 20px; 
-		    left: 30px;
-		    width: 250px;
-		}		
+		    right: 20px;
+		    width: 420px;
+		}
+		
+		#config.affix {
+			position: fixed;
+			top: 20px;
+			left: 20px;
+			width: 270px;
+		}
 			
-		#searchResults { margin-top: 50px; }
+		#searchResults { margin-top: 15px; }
 		#searchResults > .nav-tabs > li > a {
 			padding-top: 4px;
 			padding-bottom: 4px;
 		}
-		#audioBox { padding: 15px; }
 		
-		#pin { float:right; position:relative; top: -14px; right: -14px; }
-		#pin:hover { opacity: 0.8; cursor: pointer; }
+		#audioPlayer { width: 100%; }
+		
+		#config a { padding-top: 4px; padding-bottom: 4px;}
 			
 	</style>
 	
   </head>
   <body>
-	
-	<div id="main-container" class="container-fluid">
-	
+  
+  <div id="main-header" class="container-fluid">
 		<div class="row-fluid">
-		  <div id="header" class="span12">
-	  		
-	  		<h1>English Mashup</h1>
-			<div class="row-fluid">
-				  <div class="span2">
-					<ul class="nav nav-pills nav-stacked">
-					  <li class="active"><a href="#listVocabulary"><i class="icon-chevron-right"></i> Vocabulary</a></li>
-					  <li class=""><a href="#gridSystem"><i class="icon-chevron-right"></i> Grid system</a></li>
-					  <li class=""><a href="#fluidGridSystem"><i class="icon-chevron-right"></i> Fluid grid system</a></li>
-					  <li class=""><a href="#layouts"><i class="icon-chevron-right"></i> Layouts</a></li>
-					  <li class=""><a href="#responsive"><i class="icon-chevron-right"></i> Responsive design</a></li>
-					</ul>
-					
-				  	<div id="audioBox" class="row well" data-spy="affix">
-				  		<i id="pin" class="icon-share"></i>
-				  		<form class="form-search" onsubmit="return false;">
-						 	<div class="input-append span10">
-						    	<input id="searchField" type="text" class="span11 search-query" placeholder="Look for something" />
-						   	 	<button id="searchButton" type="submit" class="btn"><i class="icon-search"></i></button>
-							</div>
-						</form>				  		
-				  		<audio id="audioPlayer"></audio>
-				  		
-				  		<div id="searchResults">
-							<ul class="nav nav-tabs">
-							  <li class="active"><a href="#wr-search" data-toggle="tab">WR</a></li>
-							  <li><a href="#profile" data-toggle="tab">Other</a></li>
-							</ul>
-							
-							<div class="tab-content">
-								 <div class="tab-pane active" id="wr-search"> Wordreference Search </div>
-								 <div class="tab-pane" id="profile"> Other searches </div>
-							</div>							
-						</div>	
-				  	</div>
-				  	
-				  </div>
-			  
-				  <div class="span8" id="unitContainer">
-					
-				  </div>
-				  
-				  <div class="span2" id="configContainer">
-				  
-				  </div>
-			  </div>
-		  </div> <!-- span12 -->
-		  
-		</div>	<!-- row fluid -->
-		
-	</div>
+			<div id="header" class="span12">
+	  			<h1>English Mashup</h1>
+	  	  	</div>
+	  	</div>  
+  </div>
+	
+  <div id="main-container" class="container-fluid">
 
- 	
+		<div class="row-fluid" id="main-body">
+		
+			  <div class="span2">
+				<ul class="nav nav-pills nav-stacked" id="main-menu">
+				  <li class="active"><a href="javascript:void(0)" data-unit="vocabulary" data-name="Vocabulary List"><i class="icon-chevron-right"></i> Vocabulary List</a></li>
+				  <li class=""><a href="javascript:void(0)" data-unit="wordLinking" data-name="Word Linking"><i class="icon-chevron-right"></i> Word Linking </a></li>
+				  <li class=""><a href="#gesstheword"><i class="icon-chevron-right"></i> Guess the word </a></li>
+				  <li class=""><a href="#layouts"><i class="icon-chevron-right"></i> Layouts</a></li>
+				  <li class=""><a href="#responsive"><i class="icon-chevron-right"></i> Responsive design</a></li>
+				</ul>
+				
+				<fieldset id="config">
+					<legend>Configuration</legend>
+					<ul class="nav nav-pills nav-stacked" id="wordSpeakingEngine">
+					  	<li class="nav-header">Word Speaking Engine</li>
+					</ul>
+					<ul class="nav nav-pills nav-stacked" id="sentenceSpeakingEngine">
+					  	<li class="nav-header">Sentence Speaking Engine</li>
+					</ul>
+				</fieldset>		
+			  	
+			  </div> <!-- end menu left -->
+		  
+			  <div class="span7" id="unitContainer">
+				
+			  </div>
+			  
+			  <div class="span3" id="">
+			
+			  	<div id="audioBox" class="row well" data-spy="affix">
+			  		<div class="pull-right" style="position:relative;top:-15px;right:-5px">
+				  		<a href="javascript:Core.sBox.next()" class="pull-right"> Next &gt;  </a>
+				  		<span class="pull-right" style="text-align:center;width:20px;color:#CCC">|</span>
+				  		<a href="javascript:Core.sBox.prev()" class="pull-right"> &lt; Prev </a>
+			  		</div>
+			  		
+			  		<form class="form-search clearfix" onsubmit="return false;">
+					 	<div class="input-append span10">
+					    	<input id="searchField" type="text" class="span11 search-query" placeholder="Look for something" />
+					   	 	<button id="searchButton" type="submit" class="btn"><i class="icon-search"></i></button>
+						</div>
+					</form>				  		
+			  		<audio id="audioPlayer" controls="controls"></audio>
+			  		<div id="searchResults">
+						<ul class="nav nav-tabs">
+						  <li class="active"><a href="#wr-search" data-toggle="tab">WR</a></li>
+						  <li><a href="#profile" data-toggle="tab">Other</a></li>
+						</ul>
+						
+						<div class="tab-content">
+							 <div class="tab-pane active" id="wr-search"> Wordreference Search </div>
+							 <div class="tab-pane" id="profile"> Other searches </div>
+						</div>							
+					</div>	
+			  	</div>
+			  	
+			  </div> <!-- config container -->
+			  
+		  </div> <!-- end body -->
+		  
+		</div>	<!-- end main container -->
+		
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
  	<link type="text/css" href="http://www.codebasehero.com/files/music-player/plugin/css/style.css" rel="stylesheet" />
  	<script type="text/javascript" src="resources/music-player/jquery-jplayer/jquery.jplayer.js"></script>
@@ -164,15 +190,12 @@
 	</div>	
 	
 	
-	<div style="height:1000px"></div>
-	
 	<script>
 	 $(document).ready(function(){
 	    $('#audio').jPlayer();
 	});
 	</script>
 
-	<a href="#myModal" class="btn">Launch demo modal</a> 
  	<div class="modal fade" id="loadingLayer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static"> 
 		<div class="modal-header"> 
 		  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button> 
@@ -187,25 +210,29 @@
 	<script src="lib/js/yepnope.1.5.4-min.js"></script>
 	<script type="text/javascript">
 		//Loading ....
-		yepnope([ { load : 'http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js' },
+		yepnope([ { load: 'http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js' },
 				  { load: 'resources/bootstrap/js/bootstrap.min.js' },
 				  { load: 'resources/music-player/ttw-music-player-min.js' },
-				  { load: 'lib/js/engines/wordreference/engine.js' },
-				  { load: 'lib/js/engines/cambridge/engine.js' },
+// 				  { load: 'lib/js/engines/cambridge/engine.js' },
 				  { load: 'lib/js/core.js',
 					callback : function(url, result, key) {
-						//Core.loadApplication();
+						Core.loadApplication();
 						
 						$('#audioBox').affix({
 						      offset: {
-						        top: 260, bottom: 270
+						        top: 100, bottom: 270
 						      }
 						});								
+						
+						$('#config').affix({
+							offset : {
+								top: 260, bottom: 270
+							}
+						});
 					}
 				  }
 				  
 				  ]);
-
 	</script>
 	
   </body>

@@ -5,6 +5,13 @@ table.wr.result td { white-space: normal; }
 table.wr.result td { vertical-align: top; padding:1px; }
 table.wr.result i { margin-left: 2px; margin-right:2px; line-height: 15px; margin: 1px 2px 2px 1px; float:left; }
 table.wr.result i.term { font-weight: bold; }
-table.wr.result i.pos { color:blue; font-style: italic; }
+table.wr.result i.pos { color:blue; font-style: italic; font-size:85%; }
 table.wr.result i.sense { font-style: italic; font-size:85%; }
 
+#wrCarousel > a.carousel-control { top: 18px; width: 15px; height: 25px; font-size: 20px; line-height: 23px; }
+#wrCarousel > a.carousel-control.left { left: 2px; }
+#wrCarousel > a.carousel-control.right { right: 2px; }
+
+.wr.result > caption { font-size: 14px; font-weight: bold; line-height: 30px; }
+
+#wrCarousel > div.carousel-inner { max-height: 600px; overflow-y: auto; overflow-x: hidden;  }	
