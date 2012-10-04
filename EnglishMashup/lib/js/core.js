@@ -6,7 +6,7 @@ var Core = {
 	
 	loadEngine : function(name, callback) {
 		var baseUrl = 'lib/js/engines/' + name + '/';
-		yepnope({ 
+		yepnope({
 			load : [baseUrl + 'engine.js', baseUrl + 'engine.css'],
 			callback : function(url, result, key) {},
 			complete : function() {
@@ -168,7 +168,12 @@ var Core = {
 		};
 		
 		this.speakWord = function(word) {
-			Core.wordSpeakingEngine(word);
+			if (word.indexOf(' ')==-1) {
+				Core.wordSpeakingEngine(word);
+			}
+			else {
+				that.speakSentence(word);
+			}
 		};
 		
 		this.speakSentence = function(text) {
@@ -400,7 +405,6 @@ EnglishEngine.retrieveData = function(success) {
 	//Configure a redirect callback
 	proxy.setRedirection(function(jsonSpreadsheet) {
 		var entries = jsonSpreadsheet.feed || [];
-		console.log(entries);
 		EnglishEngine.datasources = {
 			'length' : 0,
 			'position' : {},
@@ -419,7 +423,6 @@ EnglishEngine.retrieveData = function(success) {
 			Utils.addEntryToDS(EnglishEngine.datasources['spanish'], entry['gsx$englishentry']['$t'], entryObj);
 			EnglishEngine.datasources.length = idx+1;
 		});
-		console.log('Data retrieved');				
 	});
 	
 	console.log('Retrieving data from google spreadshets...');

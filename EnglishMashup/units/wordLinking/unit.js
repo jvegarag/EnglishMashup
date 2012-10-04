@@ -1,6 +1,27 @@
 var unit = new function() {
 	
-	var instance = this;
+	
+	var getEntries = function(total) {
+		var entries = [], usedPos = [], 
+			ds = EnglishEngine.datasources['position'],
+			dsLength = EnglishEngine.datasources.length;
+		
+		while(entries.length<total) {
+			var pos;
+			do {
+				pos = parseInt(Math.random() * dsLength);
+			} while(usedPos.indexOf(pos)>=0);
+			
+			usedPos.push(pos);
+			var entry = ds[pos],
+				flags = entry['flags'].split(/,\s?/);
+			if (flags.indexOf('Vocabulary')>=0) {
+				entries.push(ds[pos]);
+			}
+		}
+		return entries;
+	};
+	
 	
 	var T = function(array) {
 		var v = [];
@@ -34,12 +55,18 @@ var unit = new function() {
 	};
 	
 	this.start = function() {
-		var circleWidth = 6, hDelta = 60, xDelta = 500;
-		var p = Raphael("svg-canvas", 800, 450);
+		var circleWidth = 6, hDelta = 60, xDelta = 500, totalWords = 7, matches = [], espTextNodes = [];
 		
-		var words = ['hello', 'how', 'are', 'you', 'fine', 'My', 'Name'],
-			totalWords = words.length;
+		var p = Raphael("svg-canvas", 800, 500);
 		
+		var entries = getEntries(totalWords),
+			engEntries = [], espEntries = [];
+		$.each(entries, function(){
+			engEntries.push(this['englishentry']);
+			espEntries.push(this['spanishentry']);
+		});
+		//Out of order
+		espEntries.sort();
 		
 		var colours = ['#C84D5F', '#7DC24B', '#EC633F', '#A0D8F1', '#DDC23F', '#0A224E', '#816A4A'];
 		
@@ -69,7 +96,6 @@ var unit = new function() {
 		};
 		
 		var onEnd = function(mE){
-			console.log(mE);
 			var xIni = this.data('xIni'),
 				yIni = this.data('yIni'),
 				pos = this.data('pos'),			
@@ -82,7 +108,11 @@ var unit = new function() {
 				if (isAround(xEnd, yEnd, mE.offsetX, mE.offsetY, 20)) {
 					around = true;
 					this.toFront();
-					Core.sBox.speakWord(words[pos]);
+					Core.sBox.speakWord(engEntries[pos]);
+					
+					//Check if matches
+					var entry = this.data('entry');
+					matches[i] = entry['spanishentry'] == espEntries[i];
 					break;
 				}
 			}
@@ -100,24 +130,27 @@ var unit = new function() {
 			
 			var xIni = 120, yIni = hDelta*(i+1);
 			
-			var $text = p.text(xIni-10, yIni, words[i])
-				.transform('S2')
+			p.text(xIni-10, yIni, engEntries[i])
+				.transform('S1.5')
 				.attr('text-anchor', 'end')
 				.attr('cursor', 'hand')
-				.data('word', words[i])
+				.data('word', engEntries[i])
 				.click(function(){
 					Core.sBox.speakWord(this.data('word'));
-				});
+				})
+				.mouseover(function(){ this.attr('fill', 'blue'); })
+				.mouseout(function(){ this.attr('fill', 'black'); });
 			
 			//Create the initial fixed circle
 			p.circle(xIni, yIni, circleWidth)
 				.attr('stroke', 'transparent')
-				.attr('fill', colours[i]);	
+				.attr('fill', colours[i]);
 			
 			var $circle = p.circle(xIni, yIni, circleWidth)
 							.attr('cursor', 'hand')
 							.attr('stroke', 'transparent')
-							.attr('fill', colours[i]);
+							.attr('fill', colours[i])
+							.data('entry', entries[i]);
 			
 			$circle.drag(onMove, onStart, onEnd);
 			
@@ -135,10 +168,28 @@ var unit = new function() {
 			p.circle(xIni + xDelta, yIni, circleWidth)
 				//.attr('stroke', 'transparent')
 				.attr('fill', 'white')
-				.attr('opacity', 0.5);
+				.attr('opacity', 0.5)
+				.data('entry', espEntries[i]);
+			
+			//Spanish text
+			var $text = p.text(xIni + xDelta + 10, yIni, espEntries[i])
+							.transform('S1.5')
+							.attr('text-anchor', 'start');
+			espTextNodes.push($text);
 		}
-
 		
+		$('#solveBtn')
+			.click(function(){
+				for(var i=0; i<espTextNodes.length; i++) {
+					var $txtNode = espTextNodes[i];
+					if (matches[i] === true) {
+						$txtNode.attr('fill', 'green');
+					}
+					else {
+						$txtNode.attr('fill', 'red');
+					}
+				}
+			});
 		
 	};
 };
