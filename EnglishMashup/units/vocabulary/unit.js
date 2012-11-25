@@ -27,5 +27,4 @@ var unit = new function() {
 		$('#unitContainer').html(data);
 		unit.start();
 	});
-		
 })();

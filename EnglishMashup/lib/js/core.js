@@ -20,6 +20,8 @@ var Core = {
 	
 	loadUnit : function(name, displayName) {
 		$('#unitContainer').html('');
+		//TODO Improve this
+		$('script[src^=units]').remove();
 		
 		Core.tm.startTask({
 			name : displayName,
@@ -33,7 +35,8 @@ var Core = {
 					},
 					error : function() {
 						alert('Error loading unit ' + name);
-					}
+					},
+					attrs: {id: 'unit-script'}
 				});
 			}
 		});		
@@ -333,6 +336,11 @@ var Utils = {
 	
 	addEntryToDS : function(datasource, key, entryObj) {
 		datasource[key] = entryObj;
+	},
+	
+	play : function(url) {
+		$('#audioPlayer')
+			.attr('src', url)[0].play();
 	}
 };
 
@@ -431,8 +439,7 @@ EnglishEngine.retrieveData = function(success) {
 
 EnglishEngine.speakWord = function(word) {
 	var howjsayUrl = 'http://howjsay.com/mp3/' + encodeURIComponent(word.toLowerCase()) + '.mp3';// + (new Date().getTime());
-	$('#audioPlayer')
-		.attr('src', howjsayUrl)[0].play();
+	Utils.play(howjsayUrl);
 };
 
 EnglishEngine.phonetic = function(text, callback) {
