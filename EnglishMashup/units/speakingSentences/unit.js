@@ -8,14 +8,16 @@ var unit = new function() {
 	var loadList = function(bookletId, listId) {
 		var url = baseURL + '/' + bookletId + '/' + listId + '/trans.json';
 		$.getJSON(url, function(data){
-			$.each(data, function(idx){				
+			$.each(data, function(idx){			
+				var id = bookletId + '-' + listId + '-' + (idx*2 + 1);
 				$table.append([
 					         '<tr>',
-					         	'<td>', (idx+1), '</td>',
+					         	'<td>', idx+1, '</td>',
 					         	'<td>', this.esp, '</td>',
-					         	'<td class="entry">',
-					         		'<i class="resolve icon-eye-open" data-id="', bookletId, '-', listId, '-', idx*2 + 1 ,'"></i><input type="text"/>', 
-					         		'<div>', this.ing, '</div>', 
+					         	'<td class="entry" id="', id, '">',
+					         		'<i class="resolve icon-eye-open" data-id="', id, '"></i>',
+					         		'<input type="text"/>', 
+					         		'<div class="ing">', this.ing, '</div>', 
 					         	'</td>',
 					         '</tr>'
 					 ].join(''));
@@ -24,7 +26,7 @@ var unit = new function() {
 	};
 	
 	this.start = function() {
-		/*
+		
 		$.getJSON('units/speakingSentences/data/booklets.json', function(data){
 			$booklets = $("#booklets");
 			$booklets.append('<ul>');
@@ -36,7 +38,7 @@ var unit = new function() {
 		}).error(function(e){
 			console.error(e);
 		});
-		*/
+		
 		$table = $("#wordsContainer");
 		loadList('TB1', 'L1');
 	};
@@ -49,6 +51,26 @@ var unit = new function() {
 	
 	this.playSound = function(itemId) {
 		Utils.play( inst.getUrl(itemId) );
+	};
+	
+	this.solveEntry = function(id) {
+		var $parent = $('#' + id);
+			var $div = $parent.find('div:first'),
+				ing = $div.text().trim(),
+				$input = $parent.find('input:first'),
+				inputVal = $input.val();
+			
+			$input.hide();
+			Utils.toSpeakableText($div, ing);
+			$div.css('display', 'inline');
+			if (ing!=inputVal) {				
+				var $sol = $('<div/>');
+				$sol.appendTo($parent);
+				Utils.toSpeakableText($sol, inputVal);
+			}
+			else {
+				$div.addClass('ok');
+			}
 	};
 };
 
@@ -65,6 +87,7 @@ var unit = new function() {
 			var id = $el.attr('data-id');
 			
 			unit.playSound(id);
+			unit.solveEntry(id);
 		});		
 		
 	});

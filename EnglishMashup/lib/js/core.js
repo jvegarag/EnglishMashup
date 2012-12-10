@@ -311,7 +311,7 @@ var Utils = {
 	toSpeakableText : function(container, text) {
 		var speakableMarkup = this.speakableMarkup(text);
 		var $cont = $(container);				
-		$cont.append( speakableMarkup );
+		$cont.html( speakableMarkup );
 		/*
 		$cont.find('span').each(function(){
 			var $this = $(this),

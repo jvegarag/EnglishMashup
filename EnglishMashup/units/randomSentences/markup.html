@@ -1,0 +1,65 @@
+<div id="unitframe">
+	<h2>Random Sentences</h2>
+	
+  	<div class="container-fluid">
+		<div id="unitsSelector" class="row-fluid">
+			<div>
+				<label class="checkbox">TB1<input type="checkbox"/></label>
+			</div>
+			<div>
+				<label class="checkbox">TB2<input type="checkbox"/></label>
+			</div>		
+		</div>  	
+		<div class="row-fluid cont">
+			<div class="prev span2">
+				
+			</div>
+			
+			<div id="sentencesContainer" class="span8">
+				
+			</div>
+			
+			<div class="next span2">
+				
+			</div>
+		</div>
+	</div>	
+	
+</div>
+	
+<style type="text/css">
+	div.prev {
+		background: url('units/randomSentences/imgs/prev.png') center center no-repeat;
+	}
+	
+	div.prev, div.next {
+		cursor:hand;
+		cursor:pointer;
+		opacity: 0.5;
+	}
+	
+	div.prev:hover, div.next:hover {
+		opacity: 1;
+	}
+	
+	div#sentencesContainer {
+	
+	}
+	
+	div.next {
+		background: url('units/randomSentences/imgs/next.png') center center no-repeat;
+	}
+	
+	div.cont > div {
+		height: 400px;
+	}
+	
+	#unitsSelector > div {
+		float:left;
+		width: 120px;
+	}
+	
+	#unitsSelector label {
+		display: inline;
+	}
+</style>
